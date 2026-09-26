@@ -27,7 +27,7 @@ def _get_value(name: str, default: str = "") -> str:
         import streamlit as st
 
         secret_value = st.secrets.get(name, "")
-    except (ImportError, FileNotFoundError, RuntimeError, AttributeError):
+    except Exception:
         secret_value = ""
     return str(secret_value).strip() or default
 
