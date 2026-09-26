@@ -170,9 +170,12 @@ never crashes and no stack traces leak to the user.
 - **No stack leakage**: all provider/network calls are wrapped in
   `try/except`, and only a generic, user-safe error string is ever surfaced;
   full details are captured only in local logs (`LOG_LEVEL` in `.env`).
-- **Secrets**: API keys are read exclusively from environment variables via
-  `python-dotenv` / `pydantic-settings`-style config; `.env` is git-ignored,
-  and `.env.example` ships with empty placeholders only.
+- **Secrets**: API keys are read from environment variables, local `.env`, or
+  Streamlit Secrets; `.env` is git-ignored, and `.env.example` ships with
+  empty placeholders only.
+- **Bounded requests and uploads**: provider calls use a 30-second timeout,
+  input text is capped by `MAX_UPLOAD_CHARS`, and Streamlit uploads are capped
+  at 10 MB with XSRF protection enabled.
 - **OWASP alignment**: covers A03 (Injection) via sanitization, A02
   (Cryptographic/Sensitive Data Exposure) via PII masking + no key logging,
   A05 (Security Misconfiguration) via safe defaults (Mock mode with no
@@ -206,6 +209,8 @@ responses — no API key or network access is required in CI.
   document, minimizing token usage and latency.
 - The Mock provider is deterministic and instant, so demos and tests never
   wait on network latency.
+- Production installs contain runtime dependencies only, while GitHub Actions
+  runs `pip-audit` on every push and pull request.
 
 ---
 
