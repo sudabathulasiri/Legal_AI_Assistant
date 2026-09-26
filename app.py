@@ -61,6 +61,14 @@ def read_uploaded_or_pasted(uploaded_file, pasted_text: str) -> str:
     return pasted_text
 
 
+def render_comparison_items(items: list[str]) -> None:
+    """Render comparison findings as readable bullets instead of raw objects."""
+    if items:
+        st.markdown("\n".join(f"- {item}" for item in items))
+    else:
+        st.caption("None identified")
+
+
 def main() -> None:
     st.title("⚖️ Legal AI Assistant")
     st.markdown(DISCLAIMER_HTML, unsafe_allow_html=True)
@@ -179,20 +187,26 @@ def render_compare_tab(client: AIClient) -> None:
         with col1:
             st.markdown('<div class="lai-section">', unsafe_allow_html=True)
             st.markdown('<p class="lai-obligation">Obligations only in Agreement A</p>', unsafe_allow_html=True)
-            st.write(result.only_in_a_obligations or "None")
+            render_comparison_items(result.only_in_a_obligations)
             st.markdown('<p class="lai-risk">Risks only in Agreement A</p>', unsafe_allow_html=True)
-            st.write(result.only_in_a_risks or "None")
+            render_comparison_items(result.only_in_a_risks)
             st.markdown("</div>", unsafe_allow_html=True)
         with col2:
             st.markdown('<div class="lai-section">', unsafe_allow_html=True)
             st.markdown('<p class="lai-obligation">Obligations only in Agreement B</p>', unsafe_allow_html=True)
-            st.write(result.only_in_b_obligations or "None")
+            render_comparison_items(result.only_in_b_obligations)
             st.markdown('<p class="lai-risk">Risks only in Agreement B</p>', unsafe_allow_html=True)
-            st.write(result.only_in_b_risks or "None")
+            render_comparison_items(result.only_in_b_risks)
             st.markdown("</div>", unsafe_allow_html=True)
 
         st.subheader("Shared Obligations & Risks")
-        st.write({"shared_obligations": result.shared_obligations, "shared_risks": result.shared_risks})
+        shared_col1, shared_col2 = st.columns(2)
+        with shared_col1:
+            st.markdown("**Shared obligations**")
+            render_comparison_items(result.shared_obligations)
+        with shared_col2:
+            st.markdown("**Shared risks**")
+            render_comparison_items(result.shared_risks)
 
 
 def render_qa_tab(client: AIClient) -> None:
