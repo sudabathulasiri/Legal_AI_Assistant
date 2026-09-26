@@ -95,7 +95,7 @@ class AIClient:
                     "User-Agent": "LegalAIAssistant/1.0",
                 },
                 json=payload,
-                timeout=30,
+                timeout=60,
             )
             response.raise_for_status()
             data = response.json()
@@ -113,10 +113,7 @@ class AIClient:
     def _complete_anthropic(self, system: str, prompt: str, max_tokens: int) -> AIResponse:
         import anthropic
 
-        client = anthropic.Anthropic(
-            api_key=self.settings.anthropic_api_key,
-            timeout=30.0,
-        )
+        client = anthropic.Anthropic(api_key=self.settings.anthropic_api_key)
         response = client.messages.create(
             model=self.settings.anthropic_model,
             max_tokens=max_tokens,
@@ -129,7 +126,7 @@ class AIClient:
     def _complete_openai(self, system: str, prompt: str, max_tokens: int) -> AIResponse:
         from openai import OpenAI
 
-        client = OpenAI(api_key=self.settings.openai_api_key, timeout=30.0)
+        client = OpenAI(api_key=self.settings.openai_api_key)
         response = client.chat.completions.create(
             model=self.settings.openai_model,
             max_tokens=max_tokens,
