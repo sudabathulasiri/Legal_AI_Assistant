@@ -18,9 +18,23 @@ _ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
 load_dotenv(dotenv_path=_ENV_PATH, override=True)  # loads the project .env regardless of cwd
 
 
+def _get_value(name: str, default: str = "") -> str:
+    """Read a setting from the environment or Streamlit Secrets."""
+    value = os.getenv(name, "").strip()
+    if value:
+        return value
+    try:
+        import streamlit as st
+
+        secret_value = st.secrets.get(name, "")
+    except Exception:
+        secret_value = ""
+    return str(secret_value).strip() or default
+
+
 def _get_int(name: str, default: int) -> int:
     """Read an integer environment variable, falling back safely on bad input."""
-    raw = os.getenv(name)
+    raw = _get_value(name)
     if raw is None or raw.strip() == "":
         return default
     try:
@@ -69,17 +83,17 @@ class Settings:
 def load_settings() -> Settings:
     """Build a Settings instance from the current environment."""
     return Settings(
-        ai_provider=os.getenv("AI_PROVIDER", "mock"),
-        groq_api_key=os.getenv("GROQ_API_KEY", "").strip(),
-        groq_model=os.getenv("GROQ_MODEL", "openai/gpt-oss-20b").strip(),
-        anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", "").strip(),
-        anthropic_model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6").strip(),
-        openai_api_key=os.getenv("OPENAI_API_KEY", "").strip(),
-        openai_model=os.getenv("OPENAI_MODEL", "gpt-4o-mini").strip(),
+        ai_provider=_get_value("AI_PROVIDER", "mock"),
+        groq_api_key=_get_value("GROQ_API_KEY"),
+        groq_model=_get_value("GROQ_MODEL", "openai/gpt-oss-20b"),
+        anthropic_api_key=_get_value("ANTHROPIC_API_KEY"),
+        anthropic_model=_get_value("ANTHROPIC_MODEL", "claude-sonnet-4-6"),
+        openai_api_key=_get_value("OPENAI_API_KEY"),
+        openai_model=_get_value("OPENAI_MODEL", "gpt-4o-mini"),
         max_upload_chars=_get_int("MAX_UPLOAD_CHARS", 200_000),
         chunk_size_chars=_get_int("CHUNK_SIZE_CHARS", 3_000),
         chunk_overlap_chars=_get_int("CHUNK_OVERLAP_CHARS", 200),
-        log_level=os.getenv("LOG_LEVEL", "INFO").strip().upper(),
+        log_level=_get_value("LOG_LEVEL", "INFO").upper(),
     )
 
 
